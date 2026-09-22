@@ -9,34 +9,33 @@ public class PlayerSetup : EditorWindow
     {
         EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
 
-        // REMOVE directional light
+        // REMOVE ALL lights
         Light[] lights = Object.FindObjectsOfType<Light>();
         foreach (Light l in lights)
         {
-            if (l.type == LightType.Directional)
-                Object.DestroyImmediate(l.gameObject);
+            Object.DestroyImmediate(l.gameObject);
         }
 
-        // Setup Camera - TOP DOWN
+        // Setup Camera
         Camera cam = Camera.main;
         cam.orthographic = true;
         cam.orthographicSize = 8f;
-        cam.transform.position = new Vector3(0, 15, 0);
+        cam.transform.position = new Vector3(0, 20, 0);
         cam.transform.rotation = Quaternion.Euler(90f, 0, 0);
-        cam.backgroundColor = new Color(0.02f, 0.02f, 0.02f);
+        cam.backgroundColor = Color.black;
         cam.clearFlags = CameraClearFlags.SolidColor;
 
         CameraFollow camFollow = cam.gameObject.AddComponent<CameraFollow>();
 
-        // Create player
+        // Create player with halo
         GameObject player = CreatePlayer();
         camFollow.target = player.transform;
 
-        // Create GameManager
+        // GameManager
         GameObject gm = new GameObject("GameManager");
         gm.AddComponent<GameManager>();
 
-        // Create map using sprites
+        // Map
         CreateMap();
 
         string scenePath = "Assets/Scenes/MainScene.unity";
@@ -51,36 +50,33 @@ public class PlayerSetup : EditorWindow
         GameObject player = new GameObject("Player");
         player.tag = "Player";
 
-        // Physics
         CircleCollider2D col = player.AddComponent<CircleCollider2D>();
         col.radius = 0.4f;
 
         Rigidbody2D rb = player.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        // Sprite
         SpriteRenderer sr = player.AddComponent<SpriteRenderer>();
         sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Kenney/PNG/Survivor 1/survivor1_stand.png");
         sr.sortingOrder = 10;
 
-        // Scripts
         player.AddComponent<PlayerMovement>();
         player.AddComponent<Shooting>();
         player.AddComponent<Health>();
 
-        // Light Halo - bright white light
+        // === 360° LIGHT HALO ===
         GameObject lightObj = new GameObject("HaloLight");
         lightObj.transform.SetParent(player.transform);
-        lightObj.transform.localPosition = new Vector3(0, 0, 5);
+        lightObj.transform.localPosition = Vector3.zero;
 
         Light haloLight = lightObj.AddComponent<Light>();
         haloLight.type = LightType.Point;
-        haloLight.range = 8f;
-        haloLight.intensity = 4f;
+        haloLight.range = 12f;
+        haloLight.intensity = 8f;
         haloLight.color = Color.white;
         haloLight.shadows = LightShadows.None;
+        haloLight.renderMode = LightRenderMode.ForcePixel;
 
         player.transform.position = Vector3.zero;
         return player;
@@ -88,42 +84,46 @@ public class PlayerSetup : EditorWindow
 
     static void CreateMap()
     {
-        // Load floor tile
         Sprite floorSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Kenney/PNG/Tiles/tile_01.png");
         Sprite wallSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Kenney/PNG/Tiles/tile_03.png");
         Sprite boxSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Kenney/PNG/Tiles/tile_14.png");
 
-        // Create floor tiles
+        // Create Lit material for floor
+        Material litMat = new Material(Shader.Find("Standard"));
+        litMat.SetFloat("_Glossiness", 0);
+        litMat.SetFloat("_Metallic", 0);
+
+        // Floor
         GameObject floorParent = new GameObject("Floor");
         for (int x = -15; x <= 15; x++)
         {
             for (int y = -15; y <= 15; y++)
             {
-                GameObject tile = new GameObject("Tile_" + x + "_" + y);
+                GameObject tile = new GameObject("Floor_" + x + "_" + y);
                 tile.transform.SetParent(floorParent.transform);
                 tile.transform.position = new Vector3(x, 0, y);
 
                 SpriteRenderer sr = tile.AddComponent<SpriteRenderer>();
                 sr.sprite = floorSprite;
                 sr.sortingOrder = 0;
-                sr.color = new Color(0.3f, 0.3f, 0.3f);
+                sr.material = litMat;
             }
         }
 
-        // Create walls
+        // Walls
         GameObject wallParent = new GameObject("Walls");
         for (int x = -16; x <= 16; x++)
         {
-            CreateWallTile(wallParent, wallSprite, x, 16);
-            CreateWallTile(wallParent, wallSprite, x, -16);
+            CreateTile(wallParent, wallSprite, x, 16, new Color(0.3f, 0.3f, 0.3f), 1, litMat);
+            CreateTile(wallParent, wallSprite, x, -16, new Color(0.3f, 0.3f, 0.3f), 1, litMat);
         }
         for (int y = -16; y <= 16; y++)
         {
-            CreateWallTile(wallParent, wallSprite, 16, y);
-            CreateWallTile(wallParent, wallSprite, -16, y);
+            CreateTile(wallParent, wallSprite, 16, y, new Color(0.3f, 0.3f, 0.3f), 1, litMat);
+            CreateTile(wallParent, wallSprite, -16, y, new Color(0.3f, 0.3f, 0.3f), 1, litMat);
         }
 
-        // Create random boxes
+        // Boxes
         GameObject boxParent = new GameObject("Boxes");
         for (int i = 0; i < 20; i++)
         {
@@ -137,23 +137,24 @@ public class PlayerSetup : EditorWindow
             SpriteRenderer sr = box.AddComponent<SpriteRenderer>();
             sr.sprite = boxSprite;
             sr.sortingOrder = 2;
-            sr.color = new Color(0.5f, 0.3f, 0.1f);
+            sr.material = litMat;
 
             BoxCollider2D boxCol = box.AddComponent<BoxCollider2D>();
         }
     }
 
-    static void CreateWallTile(GameObject parent, Sprite sprite, int x, int y)
+    static void CreateTile(GameObject parent, Sprite sprite, int x, int y, Color color, int order, Material mat)
     {
-        GameObject wall = new GameObject("Wall_" + x + "_" + y);
-        wall.transform.SetParent(parent.transform);
-        wall.transform.position = new Vector3(x, 0, y);
+        GameObject tile = new GameObject("Tile_" + x + "_" + y);
+        tile.transform.SetParent(parent.transform);
+        tile.transform.position = new Vector3(x, 0, y);
 
-        SpriteRenderer sr = wall.AddComponent<SpriteRenderer>();
+        SpriteRenderer sr = tile.AddComponent<SpriteRenderer>();
         sr.sprite = sprite;
-        sr.sortingOrder = 1;
-        sr.color = new Color(0.2f, 0.2f, 0.2f);
+        sr.sortingOrder = order;
+        sr.color = color;
+        sr.material = mat;
 
-        BoxCollider2D col = wall.AddComponent<BoxCollider2D>();
+        BoxCollider2D col = tile.AddComponent<BoxCollider2D>();
     }
 }
