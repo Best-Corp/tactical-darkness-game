@@ -7,13 +7,16 @@ public class PlayerSetup : EditorWindow
     [MenuItem("Tactical Darkness/Setup Full 2D Scene")]
     static void SetupFullScene()
     {
-        // Create new scene
         EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
 
-        // Set camera to orthographic
-        Camera.main.orthographic = true;
-        Camera.main.orthographicSize = 10f;
-        Camera.main.transform.position = new Vector3(0, 0, -10);
+        // Fix Camera for 2D top-down
+        Camera cam = Camera.main;
+        cam.orthographic = true;
+        cam.orthographicSize = 15f;
+        cam.transform.position = new Vector3(0, 20, -10);
+        cam.transform.rotation = Quaternion.Euler(90, 0, 0);
+        cam.backgroundColor = Color.black;
+        cam.clearFlags = CameraClearFlags.SolidColor;
 
         SetupPlayer();
         SetupGameManager();
@@ -23,7 +26,7 @@ public class PlayerSetup : EditorWindow
         System.IO.Directory.CreateDirectory("Assets/Scenes");
         EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), scenePath);
 
-        Debug.Log("2D scene created!");
+        Debug.Log("2D top-down scene created!");
     }
 
     static void SetupPlayer()
@@ -31,26 +34,21 @@ public class PlayerSetup : EditorWindow
         GameObject player = new GameObject("Player");
         player.tag = "Player";
 
-        // 2D Collider
         CircleCollider2D col = player.AddComponent<CircleCollider2D>();
         col.radius = 0.5f;
 
-        // Rigidbody2D
         Rigidbody2D rb = player.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
 
-        // Sprite
         SpriteRenderer sr = player.AddComponent<SpriteRenderer>();
-        sr.color = Color.blue;
+        sr.color = Color.cyan;
 
-        // Scripts
         player.AddComponent<PlayerMovement>();
         player.AddComponent<LightHalo>();
         player.AddComponent<Shooting>();
         player.AddComponent<Health>();
 
-        // Fire point
         GameObject firePoint = new GameObject("FirePoint");
         firePoint.transform.SetParent(player.transform);
         firePoint.transform.localPosition = new Vector3(1f, 0, 0);
@@ -73,22 +71,23 @@ public class PlayerSetup : EditorWindow
         ground.transform.localScale = new Vector3(10, 1, 10);
         ground.transform.position = Vector3.zero;
         ground.AddComponent<MapShrink>();
-
-        // Remove collider from ground
         Object.DestroyImmediate(ground.GetComponent<BoxCollider>());
 
+        Renderer groundRend = ground.GetComponent<Renderer>();
+        groundRend.sharedMaterial.color = new Color(0.05f, 0.05f, 0.05f);
+
         // Walls
-        CreateWall("WallNorth", new Vector3(0, 0, 50), new Vector3(100, 4, 1));
-        CreateWall("WallSouth", new Vector3(0, 0, -50), new Vector3(100, 4, 1));
-        CreateWall("WallEast", new Vector3(50, 0, 0), new Vector3(1, 4, 100));
-        CreateWall("WallWest", new Vector3(-50, 0, 0), new Vector3(1, 4, 100));
+        CreateWall("WallNorth", new Vector3(0, 0.5f, 50), new Vector3(100, 1, 1));
+        CreateWall("WallSouth", new Vector3(0, 0.5f, -50), new Vector3(100, 1, 1));
+        CreateWall("WallEast", new Vector3(50, 0.5f, 0), new Vector3(1, 1, 100));
+        CreateWall("WallWest", new Vector3(-50, 0.5f, 0), new Vector3(1, 1, 100));
 
         // Cover
         for (int i = 0; i < 10; i++)
         {
             float x = Random.Range(-40f, 40f);
             float z = Random.Range(-40f, 40f);
-            CreateCover("Cover_" + i, new Vector3(x, 0, z));
+            CreateCover("Cover_" + i, new Vector3(x, 0.5f, z));
         }
     }
 
@@ -108,9 +107,9 @@ public class PlayerSetup : EditorWindow
         cover.name = name;
         cover.transform.position = position;
         cover.transform.localScale = new Vector3(
-            Random.Range(1f, 3f),
+            Random.Range(2f, 4f),
             Random.Range(1f, 2f),
-            Random.Range(1f, 3f)
+            Random.Range(2f, 4f)
         );
         Renderer rend = cover.GetComponent<Renderer>();
         rend.sharedMaterial.color = new Color(0.15f, 0.15f, 0.15f);
