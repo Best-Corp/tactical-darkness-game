@@ -1,5 +1,4 @@
 using UnityEngine;
-using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,9 +7,6 @@ public class GameManager : MonoBehaviour
     public int maxPlayers = 10;
     public int playersAlive;
     public float shrinkAmount = 1f;
-    
-    public TextMeshProUGUI playersAliveText;
-    public TextMeshProUGUI announcementText;
     
     public float mapSize = 100f;
     private float currentMapSize;
@@ -27,8 +23,7 @@ public class GameManager : MonoBehaviour
     {
         playersAlive = maxPlayers;
         currentMapSize = mapSize;
-        UpdateUI();
-        ShowAnnouncement("Game Started!");
+        Debug.Log("Game Started! Players alive: " + playersAlive);
     }
 
     public void PlayerDied()
@@ -36,36 +31,12 @@ public class GameManager : MonoBehaviour
         playersAlive--;
         currentMapSize -= shrinkAmount;
         
-        UpdateUI();
-        ShowAnnouncement($"Player Eliminated! {playersAlive} remaining");
+        Debug.Log("Player Eliminated! " + playersAlive + " remaining");
         
         if (playersAlive <= 1)
         {
-            ShowAnnouncement("Game Over!");
+            Debug.Log("Game Over!");
         }
-    }
-
-    void UpdateUI()
-    {
-        if (playersAliveText != null)
-            playersAliveText.text = $"Players Alive: {playersAlive}";
-    }
-
-    void ShowAnnouncement(string message)
-    {
-        if (announcementText != null)
-        {
-            announcementText.text = message;
-            announcementText.gameObject.SetActive(true);
-            CancelInvoke(nameof(HideAnnouncement));
-            Invoke(nameof(HideAnnouncement), 3f);
-        }
-    }
-
-    void HideAnnouncement()
-    {
-        if (announcementText != null)
-            announcementText.gameObject.SetActive(false);
     }
 
     public float GetCurrentMapSize()
