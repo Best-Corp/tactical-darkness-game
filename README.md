@@ -1,52 +1,80 @@
-# Tactical Darkness Game
+# Tactical Darkness - Jeu de Combat Tactique
 
-A tactical horror battle royale where 10 players fight in complete darkness with only a light halo to see. Features one-shot kills, shrinking map by deaths, and unique items.
+Un battle royale tactique d'horreur où 10 joueurs se battent dans l'obscurité totale avec seulement un halo lumineux pour voir. Fonctionnalités : morts en un coup, carte rétrécissante par éliminations, et objets uniques.
 
-## Core Mechanics
+## Mécaniques Principales
 
-- **Darkness-Based Visibility**: 360° light halo reveals only what's close
-- **One-Shot Kills**: 1 bullet = instant death, no HP
-- **Shrinking Map**: Map reduces with each kill, not by timer
-- **Unique Items**: 5 special items with 15-second effects
-- **AI Bots**: Fill lobbies to 10 players with sound/light-based AI
+- **Visibilité dans l'Obscurité** : Halo lumineux 360° révèle uniquement ce qui est proche
+- **Morts en un Coups** : 1 balle = mort instantanée, pas de barre de vie
+- **Carte Rétrécissante** : La carte se réduit avec chaque élimination, pas par timer
+- **Objets Uniques** : 5 objets spéciaux avec effets de 15 secondes
+- **Bots IA** : Remplissent les lobbies à 10 joueurs avec IA basée sur le son/lumière
 
-## Tech Stack
+## Technologies
 
-- Unity 2022 LTS or newer
+- Unity 6.x (6000.6.2f1)
 - C#
-- Git for version control
+- Git pour le contrôle de version
 
-## Project Structure
+## Structure du Projet
 
 ```
 Assets/
   Scripts/
-    Core/           - Game mode, game manager
-    Player/         - Player controller, movement
-    Combat/         - Shooting, damage system
-    Items/          - Item system, effects
-    AI/             - Bot behavior
-    Map/            - Shrinking, visibility
-  Scenes/           - Game levels
-  Materials/        - Lighting, shaders
-  Audio/            - Sound effects
-  Prefabs/          - Reusable game objects
+    Core/           - Game mode, game manager, caméra
+    Player/         - Mouvement du joueur, halo lumineux
+    Combat/         - Tir, système de dégâts
+    Items/          - Système d'objets, effets
+    Map/            - Rétrécissement, visibilité
+  Scenes/           - Niveaux de jeu
+  Materials/        - Éclairage, shaders
+  Audio/            - Effets sonores
+  Prefabs/          - Objets réutilisables
 ```
 
-## Getting Started
+## Installation
 
-1. Clone this repository
-2. Open Unity Hub
-3. Add project from disk (select this folder)
-4. Open and run
+1. Cloner ce dépôt
+2. Ouvrir Unity Hub
+3. Ajouter le projet depuis le disque (sélectionner ce dossier)
+4. Ouvrir et jouer
 
-## Team
+## Comment Ouvrir le Projet
 
-- Project Manager
-- Programmers
-- Artists
-- Designers
+### Option 1 : Cloner depuis GitHub
+```bash
+git clone https://github.com/Best-Corp/tactical-darkness-game.git
+```
+Puis ouvrir Unity Hub → Ajouter projet depuis le disque → sélectionner le dossier.
 
-## License
+### Option 2 : Unity Hub
+1. Ouvrir **Unity Hub**
+2. Cliquer **Ajouter** → **Ajouter projet depuis le disque**
+3. Naviguer vers le dossier cloné
+4. Sélectionner le dossier racine
 
-Private - All rights reserved
+## Prérequis
+
+| Prérequis | Version |
+|-----------|---------|
+| **Unity** | 6000.6.2f1 (ou similaire 6.x) |
+| **Git** | Toute version récente |
+
+## Commandes de Jeu
+
+| Action | Contrôles |
+|--------|-----------|
+| **Déplacement** | ZQSD / WASD |
+| **Viser** | Position de la souris |
+| **Tirer** | Clic gauche |
+
+## Équipe
+
+- Chef de Projet
+- Programmeurs
+- Artistes
+- Concepteurs
+
+## Licence
+
+Privé - Tous droits réservés
