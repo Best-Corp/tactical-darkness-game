@@ -7,15 +7,17 @@ public class LightHalo : MonoBehaviour
 
     void Start()
     {
+        // Create point light for halo
         GameObject lightObj = new GameObject("HaloLight");
         lightObj.transform.SetParent(transform);
-        lightObj.transform.localPosition = Vector3.zero;
+        lightObj.transform.localPosition = new Vector3(0, 1, 0);
 
         haloLight = lightObj.AddComponent<Light>();
         haloLight.type = LightType.Point;
         haloLight.range = haloRadius;
-        haloLight.intensity = 2f;
+        haloLight.intensity = 3f;
         haloLight.color = Color.white;
+        haloLight.shadows = LightShadows.None;
     }
 
     void OnDrawGizmosSelected()
