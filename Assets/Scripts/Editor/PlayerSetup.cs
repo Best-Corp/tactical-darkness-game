@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerSetup : EditorWindow
 {
@@ -24,7 +25,6 @@ public class PlayerSetup : EditorWindow
         cam.backgroundColor = Color.black;
         cam.clearFlags = CameraClearFlags.SolidColor;
 
-        // Add camera follow
         CameraFollow camFollow = cam.gameObject.AddComponent<CameraFollow>();
 
         SetupPlayer(camFollow);
@@ -35,7 +35,7 @@ public class PlayerSetup : EditorWindow
         System.IO.Directory.CreateDirectory("Assets/Scenes");
         EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), scenePath);
 
-        Debug.Log("Scene ready! Player should be visible with halo light.");
+        Debug.Log("Scène créée avec Kenney sprites!");
     }
 
     static void SetupPlayer(CameraFollow camFollow)
@@ -45,26 +45,23 @@ public class PlayerSetup : EditorWindow
 
         // 2D physics
         CircleCollider2D col = player.AddComponent<CircleCollider2D>();
-        col.radius = 0.5f;
+        col.radius = 0.4f;
 
         Rigidbody2D rb = player.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
 
-        // Player sprite - BIG and VISIBLE
+        // Kenney sprite
         SpriteRenderer sr = player.AddComponent<SpriteRenderer>();
-        sr.sprite = CreateCircleSprite(64);
-        sr.color = Color.cyan;
-
-        // Make player bigger
-        player.transform.localScale = new Vector3(1f, 1f, 1f);
+        sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Kenney/PNG/Survivor 1/survivor1_stand.png");
+        sr.sortingOrder = 10;
 
         // Scripts
         player.AddComponent<PlayerMovement>();
         player.AddComponent<Shooting>();
         player.AddComponent<Health>();
 
-        // Light Halo - BRIGHT
+        // Light Halo
         GameObject lightObj = new GameObject("HaloLight");
         lightObj.transform.SetParent(player.transform);
         lightObj.transform.localPosition = new Vector3(0, 0, 2f);
@@ -78,37 +75,10 @@ public class PlayerSetup : EditorWindow
 
         player.transform.position = new Vector3(0, 0, 0);
 
-        // Camera follows player
         if (camFollow != null)
         {
             camFollow.target = player.transform;
         }
-    }
-
-    static Sprite CreateCircleSprite(int size)
-    {
-        Texture2D tex = new Texture2D(size, size);
-        Color transparent = new Color(0, 0, 0, 0);
-        Color white = Color.white;
-
-        int center = size / 2;
-        float radius = size / 2f - 1;
-
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
-                if (dist <= radius)
-                    tex.SetPixel(x, y, white);
-                else
-                    tex.SetPixel(x, y, transparent);
-            }
-        }
-
-        tex.Apply();
-        tex.filterMode = FilterMode.Point;
-        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size / 2);
     }
 
     static void SetupGameManager()
