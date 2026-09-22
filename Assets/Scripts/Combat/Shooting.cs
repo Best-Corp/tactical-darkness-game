@@ -4,55 +4,50 @@ public class Shooting : MonoBehaviour
 {
     public float damage = 100f;
     public float range = 5f;
-    public float fireRate = 1f;
-    
+    public Transform firePoint;
     public LightHalo lightHalo;
-    public ParticleSystem muzzleFlash;
-    public GameObject impactEffect;
-    
-    private float nextTimeToFire = 0f;
+
+    private Vector2 aimDirection;
 
     void Update()
     {
-        if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire)
+        // Mouse aim
+        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        aimDirection = (mousePos - (Vector2)transform.position).normalized;
+
+        // Rotate fire point
+        if (firePoint != null)
         {
-            nextTimeToFire = Time.time + 1f / fireRate;
+            float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
+            firePoint.rotation = Quaternion.Euler(0, 0, angle);
+        }
+
+        // Shoot
+        if (Input.GetButtonDown("Fire1"))
+        {
             Shoot();
         }
     }
 
     void Shoot()
     {
-        // Play muzzle flash
-        if (muzzleFlash != null)
-            muzzleFlash.Play();
+        RaycastHit2D hit = Physics2D.Raycast(
+            firePoint != null ? firePoint.position : transform.position,
+            aimDirection,
+            range
+        );
 
-        // Raycast from camera
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, range))
+        if (hit.collider != null)
         {
-            // Check if target is in halo
-            float distanceToTarget = Vector3.Distance(transform.position, hit.point);
-            
-            if (distanceToTarget <= lightHalo.haloRadius)
+            float distance = Vector2.Distance(transform.position, hit.point);
+
+            if (distance <= lightHalo.haloRadius)
             {
-                // Target is in light - can hit
-                Health target = hit.transform.GetComponent<Health>();
+                Health target = hit.collider.GetComponent<Health>();
                 if (target != null)
                 {
                     target.TakeDamage(damage);
                 }
-
-                // Spawn impact effect
-                if (impactEffect != null)
-                {
-                    Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
-                }
-            }
-            else
-            {
-                // Target is in darkness - bullet stops
-                Debug.Log("Target in darkness - cannot hit!");
             }
         }
     }

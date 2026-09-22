@@ -8,9 +8,9 @@ public class Health : MonoBehaviour
     public void TakeDamage(float amount)
     {
         if (isDead) return;
-        
+
         health -= amount;
-        
+
         if (health <= 0f)
         {
             Die();
@@ -20,14 +20,12 @@ public class Health : MonoBehaviour
     void Die()
     {
         isDead = true;
-        
-        // Notify game manager
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.PlayerDied();
         }
-        
-        // Disable player
+
         gameObject.SetActive(false);
     }
 }
