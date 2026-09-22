@@ -22,8 +22,8 @@ public class PlayerSetup : EditorWindow
         cam.transform.rotation = Quaternion.identity;
         cam.backgroundColor = Color.black;
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.nearClipPlane = -1f;
-        cam.farClipPlane = 1f;
+        cam.nearClipPlane = -10f;
+        cam.farClipPlane = 10f;
         cam.orthographic = true;
 
         CameraFollow camFollow = cam.gameObject.AddComponent<CameraFollow>();
