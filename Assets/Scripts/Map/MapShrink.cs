@@ -2,34 +2,60 @@ using UnityEngine;
 
 public class MapShrink : MonoBehaviour
 {
-    public float shrinkSpeed = 1f;
-    public float minSize = 10f;
+    public float initialHalfSize = 16f;
+    public float shrinkAmount = 2f;
+    public float minHalfSize = 8f;
 
-    private Vector3 originalScale;
-    private float targetSize;
+    private float currentHalfSize;
+    private BoxCollider2D col;
 
     void Start()
     {
-        originalScale = transform.localScale;
-        targetSize = GameManager.Instance.mapSize;
+        currentHalfSize = initialHalfSize;
+        col = GetComponent<BoxCollider2D>();
+        UpdateBoundary();
     }
 
-    void Update()
+    public void Shrink()
     {
-        if (GameManager.Instance != null)
-        {
-            float currentMapSize = GameManager.Instance.GetCurrentMapSize();
+        currentHalfSize -= shrinkAmount;
 
-            if (currentMapSize < targetSize)
-            {
-                targetSize = currentMapSize;
-            }
+        if (currentHalfSize < minHalfSize)
+            currentHalfSize = minHalfSize;
+
+        UpdateBoundary();
+
+        Debug.Log("Zone réduite: " + currentHalfSize + " (min: " + minHalfSize + ")");
+    }
+
+    void UpdateBoundary()
+    {
+        if (col == null) return;
+
+        Vector2 pos = transform.position;
+        string name = gameObject.name;
+
+        if (name.Contains("Top"))
+        {
+            pos.y = currentHalfSize;
+            col.size = new Vector2(currentHalfSize * 2 + 2, 1);
+        }
+        else if (name.Contains("Bottom"))
+        {
+            pos.y = -currentHalfSize;
+            col.size = new Vector2(currentHalfSize * 2 + 2, 1);
+        }
+        else if (name.Contains("Left"))
+        {
+            pos.x = -currentHalfSize;
+            col.size = new Vector2(1, currentHalfSize * 2);
+        }
+        else if (name.Contains("Right"))
+        {
+            pos.x = currentHalfSize;
+            col.size = new Vector2(1, currentHalfSize * 2);
         }
 
-        if (transform.localScale.x > targetSize / 100f)
-        {
-            float newSize = Mathf.Lerp(transform.localScale.x, targetSize / 100f, shrinkSpeed * Time.deltaTime);
-            transform.localScale = new Vector3(newSize, originalScale.y, newSize);
-        }
+        transform.position = pos;
     }
 }

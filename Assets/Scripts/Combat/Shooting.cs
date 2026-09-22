@@ -2,45 +2,20 @@ using UnityEngine;
 
 public class Shooting : MonoBehaviour
 {
-    public float damage = 100f;
-    public float range = 5f;
-    public Transform firePoint;
-    public LightHalo lightHalo;
+    public float range = 15f;
+    public LayerMask hitMask;
 
-    private Vector2 aimDirection;
-    private Camera mainCam;
+    private PlayerAim aim;
+    private DarknessOverlay fog;
 
     void Start()
     {
-        mainCam = Camera.main;
-        if (lightHalo == null)
-            lightHalo = GetComponent<LightHalo>();
-
-        if (firePoint == null)
-        {
-            GameObject fp = new GameObject("FirePoint");
-            fp.transform.SetParent(transform);
-            fp.transform.localPosition = new Vector3(1f, 0, 0);
-            firePoint = fp.transform;
-        }
+        aim = GetComponent<PlayerAim>();
+        fog = GetComponent<DarknessOverlay>();
     }
 
     void Update()
     {
-        if (mainCam == null) return;
-
-        Vector3 mouseScreen = Input.mousePosition;
-        mouseScreen.z = 10f;
-        Vector2 mouseWorld = mainCam.ScreenToWorldPoint(mouseScreen);
-
-        aimDirection = (mouseWorld - (Vector2)transform.position).normalized;
-
-        if (firePoint != null)
-        {
-            float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
-            firePoint.rotation = Quaternion.Euler(0, 0, angle);
-        }
-
         if (Input.GetButtonDown("Fire1"))
         {
             Shoot();
@@ -49,24 +24,30 @@ public class Shooting : MonoBehaviour
 
     void Shoot()
     {
-        Vector2 origin = firePoint != null ? (Vector2)firePoint.position : (Vector2)transform.position;
+        if (aim == null || aim.firePoint == null) return;
 
-        RaycastHit2D hit = Physics2D.Raycast(origin, aimDirection, range);
+        float maxRange = fog != null ? Mathf.Min(range, fog.haloRadius) : range;
+
+        Vector2 origin = aim.firePoint.position;
+        Vector2 dir = aim.firePoint.right;
+
+        RaycastHit2D hit = Physics2D.Raycast(origin, dir, maxRange, hitMask);
 
         if (hit.collider != null)
         {
-            float distance = Vector2.Distance(transform.position, hit.point);
+            GameObject target = hit.collider.gameObject;
 
-            if (lightHalo != null && distance <= lightHalo.haloRadius)
+            // Check if it's a combatant
+            Health health = target.GetComponent<Health>();
+            if (health == null)
+                health = target.GetComponentInParent<Health>();
+
+            if (health != null)
             {
-                Health target = hit.collider.GetComponent<Health>();
-                if (target != null)
-                {
-                    target.TakeDamage(damage);
-                }
+                health.TakeDamage(1);
             }
         }
 
-        Debug.DrawRay(origin, aimDirection * range, Color.red, 0.5f);
+        Debug.DrawRay(origin, dir * maxRange, Color.red, 0.3f);
     }
 }

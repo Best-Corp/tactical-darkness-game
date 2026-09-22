@@ -1,15 +1,12 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public int maxPlayers = 10;
-    public int playersAlive;
-    public float shrinkAmount = 1f;
-
-    public float mapSize = 100f;
-    private float currentMapSize;
+    private List<GameObject> combatants = new List<GameObject>();
+    private int kills = 0;
 
     void Awake()
     {
@@ -21,26 +18,50 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        playersAlive = maxPlayers;
-        currentMapSize = mapSize;
-        Debug.Log("Game Started! Players alive: " + playersAlive);
+        Health[] healths = FindObjectsOfType<Health>();
+        foreach (Health h in healths)
+        {
+            RegisterCombatant(h.gameObject);
+        }
+
+        Debug.Log("Combattants enregistrés: " + combatants.Count);
     }
 
-    public void PlayerDied()
+    public void RegisterCombatant(GameObject combatant)
     {
-        playersAlive--;
-        currentMapSize -= shrinkAmount;
-
-        Debug.Log("Player Eliminated! " + playersAlive + " remaining");
-
-        if (playersAlive <= 1)
+        if (!combatants.Contains(combatant))
         {
-            Debug.Log("Game Over! Winner!");
+            combatants.Add(combatant);
+
+            Health health = combatant.GetComponent<Health>();
+            if (health != null)
+                health.Died += HandleDied;
         }
     }
 
-    public float GetCurrentMapSize()
+    void HandleDied(Health deadHealth)
     {
-        return currentMapSize;
+        GameObject dead = deadHealth.gameObject;
+
+        if (!combatants.Contains(dead)) return;
+
+        combatants.Remove(dead);
+        kills++;
+
+        Debug.Log("Élimination! " + combatants.Count + " restants. Kills: " + kills);
+
+        MapShrink[] shrinks = FindObjectsOfType<MapShrink>();
+        foreach (MapShrink s in shrinks)
+        {
+            s.Shrink();
+        }
+
+        if (combatants.Count <= 1)
+        {
+            if (combatants.Count == 1)
+                Debug.Log("VICTOIRE!");
+            else
+                Debug.Log("MATCH NUL!");
+        }
     }
 }

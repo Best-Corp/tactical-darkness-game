@@ -2,55 +2,81 @@ using UnityEngine;
 
 public class DarknessOverlay : MonoBehaviour
 {
-    public float haloRadius = 5f;
-    public Material darknessMaterial;
+    public float haloRadius = 12f;
+    public LayerMask occluderMask;
 
-    private RenderTexture renderTexture;
-    private Camera darkCam;
+    private MeshFilter meshFilter;
+    private MeshRenderer meshRenderer;
+    private Mesh fogMesh;
+    private Material fogMat;
+
+    private int segments = 64;
+    private float fogSize = 100f;
 
     void Start()
     {
-        // Create darkness texture
-        renderTexture = new RenderTexture(256, 256, 0);
-        renderTexture.Create();
+        GameObject fogObj = new GameObject("Fog");
+        fogObj.transform.SetParent(transform);
+        fogObj.transform.localPosition = new Vector3(0, 0, 0.5f);
 
-        // Create a circle texture for the halo
-        Texture2D circleTex = CreateCircleTexture(256, (int)(haloRadius * 20));
+        meshFilter = fogObj.AddComponent<MeshFilter>();
+        meshRenderer = fogObj.AddComponent<MeshRenderer>();
 
-        if (darknessMaterial == null)
-        {
-            darknessMaterial = new Material(Shader.Find("Sprites/Default"));
-        }
-        darknessMaterial.mainTexture = circleTex;
+        Shader shader = Shader.Find("Custom/FogOverlay");
+        if (shader == null)
+            shader = Shader.Find("Sprites/Default");
+
+        fogMat = new Material(shader);
+        fogMat.color = Color.black;
+
+        meshRenderer.material = fogMat;
+        meshRenderer.sortingLayerName = "Fog";
+        meshRenderer.sortingOrder = 100;
+
+        fogMesh = new Mesh();
+        fogMesh.name = "FogMesh";
+        meshFilter.mesh = fogMesh;
+
+        GenerateFogMesh();
     }
 
-    Texture2D CreateCircleTexture(int size, int radius)
+    void LateUpdate()
     {
-        Texture2D tex = new Texture2D(size, size);
-        Color transparent = new Color(0, 0, 0, 0);
-        Color opaque = new Color(0, 0, 0, 1);
-
-        int center = size / 2;
-
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
-                if (dist < radius)
-                    tex.SetPixel(x, y, transparent);
-                else
-                    tex.SetPixel(x, y, opaque);
-            }
-        }
-
-        tex.Apply();
-        return tex;
+        GenerateFogMesh();
     }
 
-    void OnDestroy()
+    void GenerateFogMesh()
     {
-        if (renderTexture != null)
-            renderTexture.Release();
+        Vector3 center = transform.position;
+        float r = fogSize;
+
+        Vector3[] vertices = new Vector3[segments + 1];
+        int[] triangles = new int[segments * 3];
+
+        vertices[0] = new Vector3(0, 0, 0);
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = (float)i / segments * Mathf.PI * 2f;
+            vertices[i + 1] = new Vector3(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r, 0);
+        }
+
+        for (int i = 0; i < segments; i++)
+        {
+            triangles[i * 3] = 0;
+            triangles[i * 3 + 1] = i + 1;
+            triangles[i * 3 + 2] = (i + 1) % segments + 1;
+        }
+
+        fogMesh.Clear();
+        fogMesh.vertices = vertices;
+        fogMesh.triangles = triangles;
+        fogMesh.RecalculateNormals();
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, haloRadius);
     }
 }
