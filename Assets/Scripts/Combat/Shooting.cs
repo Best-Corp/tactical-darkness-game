@@ -8,21 +8,39 @@ public class Shooting : MonoBehaviour
     public LightHalo lightHalo;
 
     private Vector2 aimDirection;
+    private Camera mainCam;
+
+    void Start()
+    {
+        mainCam = Camera.main;
+        if (lightHalo == null)
+            lightHalo = GetComponent<LightHalo>();
+
+        if (firePoint == null)
+        {
+            GameObject fp = new GameObject("FirePoint");
+            fp.transform.SetParent(transform);
+            fp.transform.localPosition = new Vector3(1f, 0, 0);
+            firePoint = fp.transform;
+        }
+    }
 
     void Update()
     {
-        // Mouse aim
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        aimDirection = (mousePos - (Vector2)transform.position).normalized;
+        if (mainCam == null) return;
 
-        // Rotate fire point
+        Vector3 mouseScreen = Input.mousePosition;
+        mouseScreen.z = 10f;
+        Vector2 mouseWorld = mainCam.ScreenToWorldPoint(mouseScreen);
+
+        aimDirection = (mouseWorld - (Vector2)transform.position).normalized;
+
         if (firePoint != null)
         {
             float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
             firePoint.rotation = Quaternion.Euler(0, 0, angle);
         }
 
-        // Shoot
         if (Input.GetButtonDown("Fire1"))
         {
             Shoot();
@@ -31,17 +49,15 @@ public class Shooting : MonoBehaviour
 
     void Shoot()
     {
-        RaycastHit2D hit = Physics2D.Raycast(
-            firePoint != null ? firePoint.position : transform.position,
-            aimDirection,
-            range
-        );
+        Vector2 origin = firePoint != null ? (Vector2)firePoint.position : (Vector2)transform.position;
+
+        RaycastHit2D hit = Physics2D.Raycast(origin, aimDirection, range);
 
         if (hit.collider != null)
         {
             float distance = Vector2.Distance(transform.position, hit.point);
 
-            if (distance <= lightHalo.haloRadius)
+            if (lightHalo != null && distance <= lightHalo.haloRadius)
             {
                 Health target = hit.collider.GetComponent<Health>();
                 if (target != null)
@@ -50,5 +66,7 @@ public class Shooting : MonoBehaviour
                 }
             }
         }
+
+        Debug.DrawRay(origin, aimDirection * range, Color.red, 0.5f);
     }
 }
