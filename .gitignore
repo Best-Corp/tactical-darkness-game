@@ -1,31 +1,47 @@
-# Unreal Engine .gitignore
+# Unity .gitignore
 
-# Build results
-[Bb]inaries/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
+# Folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
 [Bb]uild/
-
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# User-specific files (MonoDevelop/Xamarin Studio)
-*.userprefs
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
 
 # IDE
 .vs/
 .vscode/
-*.swp
-*.swo
-*~
+*.csproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics generated file
+crashlytics-build.properties
 
 # OS generated files
 .DS_Store
@@ -35,36 +51,3 @@ bld/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Unreal Engine
-*.VC.db
-*.VC.VC.opendb
-DerivedDataCache/
-Intermediate/
-Saved/
-Build/
-Binaries/
-*.sln
-*.suo
-*.opensdf
-*.sdf
-*.VC.db
-*.VC.VC.opendb
-
-# Project files
-*.uproject
-*.uplugin
-
-# Binary files
-*.dll
-*.exe
-*.so
-*.dylib
-
-# Compiled files
-*.o
-*.obj
-
-# Debug files
-*.dSYM/
-*.su

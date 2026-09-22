@@ -12,33 +12,33 @@ A tactical horror battle royale where 10 players fight in complete darkness with
 
 ## Tech Stack
 
-- Unreal Engine 5.x
-- C++ / Blueprints
+- Unity 2022 LTS or newer
+- C#
 - Git for version control
 
 ## Project Structure
 
 ```
-Source/
-  TacticalDarkness/
-    Core/           - Game mode, player controller
-    Player/         - Player character, movement
+Assets/
+  Scripts/
+    Core/           - Game mode, game manager
+    Player/         - Player controller, movement
     Combat/         - Shooting, damage system
     Items/          - Item system, effects
     AI/             - Bot behavior
     Map/            - Shrinking, visibility
-Content/
-  Blueprints/       - Visual scripting
+  Scenes/           - Game levels
   Materials/        - Lighting, shaders
-  Maps/             - Game levels
   Audio/            - Sound effects
+  Prefabs/          - Reusable game objects
 ```
 
 ## Getting Started
 
 1. Clone this repository
-2. Open `TacticalDarkness.uproject` in Unreal Engine
-3. Build and run
+2. Open Unity Hub
+3. Add project from disk (select this folder)
+4. Open and run
 
 ## Team
 
