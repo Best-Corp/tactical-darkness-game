@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEngine.UI;
 
 public class PlayerSetup : EditorWindow
 {
@@ -17,13 +16,16 @@ public class PlayerSetup : EditorWindow
             Object.DestroyImmediate(dirLight.gameObject);
         }
 
-        // Setup Camera
+        // Setup Camera - TOP DOWN VIEW
         Camera cam = Camera.main;
         cam.orthographic = true;
-        cam.orthographicSize = 10f;
-        cam.transform.position = new Vector3(0, 0, -10);
+        cam.orthographicSize = 12f;
+        cam.transform.position = new Vector3(0, 20, 0);
+        cam.transform.rotation = Quaternion.Euler(90f, 0, 0);
         cam.backgroundColor = Color.black;
         cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.nearClipPlane = 0.1f;
+        cam.farClipPlane = 100f;
 
         CameraFollow camFollow = cam.gameObject.AddComponent<CameraFollow>();
 
@@ -35,7 +37,7 @@ public class PlayerSetup : EditorWindow
         System.IO.Directory.CreateDirectory("Assets/Scenes");
         EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), scenePath);
 
-        Debug.Log("Scène créée avec Kenney sprites!");
+        Debug.Log("Scène créée - vue de haut!");
     }
 
     static void SetupPlayer(CameraFollow camFollow)
@@ -43,7 +45,6 @@ public class PlayerSetup : EditorWindow
         GameObject player = new GameObject("Player");
         player.tag = "Player";
 
-        // 2D physics
         CircleCollider2D col = player.AddComponent<CircleCollider2D>();
         col.radius = 0.4f;
 
@@ -51,12 +52,10 @@ public class PlayerSetup : EditorWindow
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
 
-        // Kenney sprite
         SpriteRenderer sr = player.AddComponent<SpriteRenderer>();
         sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Kenney/PNG/Survivor 1/survivor1_stand.png");
         sr.sortingOrder = 10;
 
-        // Scripts
         player.AddComponent<PlayerMovement>();
         player.AddComponent<Shooting>();
         player.AddComponent<Health>();
@@ -64,12 +63,12 @@ public class PlayerSetup : EditorWindow
         // Light Halo
         GameObject lightObj = new GameObject("HaloLight");
         lightObj.transform.SetParent(player.transform);
-        lightObj.transform.localPosition = new Vector3(0, 0, 2f);
+        lightObj.transform.localPosition = new Vector3(0, 5, 0);
 
         Light haloLight = lightObj.AddComponent<Light>();
         haloLight.type = LightType.Point;
-        haloLight.range = 8f;
-        haloLight.intensity = 5f;
+        haloLight.range = 10f;
+        haloLight.intensity = 3f;
         haloLight.color = Color.white;
         haloLight.shadows = LightShadows.None;
 
